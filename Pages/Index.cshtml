@@ -1,0 +1,134 @@
+﻿@page
+@using CFAGestionClientes.Models
+@using CFAGestionClientes.Data
+@inject CFAContext DbContext
+@model IndexModel
+
+@{
+    ViewData["Title"] = "Buscar Clientes";
+}
+
+<div class="container-fluid">
+    <h1>Buscar Clientes</h1>
+    <form id="searchForm" class="mb-4">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="searchByName" class="form-label">Buscar por Nombre:</label>
+                <input type="text" id="searchByName" class="form-control" placeholder="Ingrese nombre" />
+            </div>
+            <div class="col-md-4">
+                <label for="searchByDoc" class="form-label">Buscar por Número de Documento:</label>
+                <input type="number" id="searchByDoc" class="form-control" placeholder="Ingrese número de documento" />
+            </div>
+            <div class="col-md-4">
+                <label for="searchByBirthDateStart" class="form-label">Fecha de Nacimiento (Inicio):</label>
+                <input type="date" id="searchByBirthDateStart" class="form-control" />
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="searchByBirthDateEnd" class="form-label">Fecha de Nacimiento (Fin):</label>
+                <input type="date" id="searchByBirthDateEnd" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label for="searchByPhone" class="form-label">Buscar por Número de Teléfono:</label>
+                <input type="number" id="searchByPhone" class="form-control" placeholder="Ingrese número de teléfono" />
+            </div>
+            <div class="col-md-4">
+                <label for="searchByAddress" class="form-label">Buscar por Dirección:</label>
+                <input type="text" id="searchByAddress" class="form-control" placeholder="Ingrese dirección" />
+            </div>
+        </div>
+        <button type="button" id="searchButton" class="btn btn-primary">Buscar</button>
+    </form>
+
+    <h2>Resultados</h2>
+    <ul id="resultsList" class="list-group"></ul>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#searchButton').click(function () {
+                const name = $('#searchByName').val().trim();
+                const doc = $('#searchByDoc').val().trim();
+                const birthDateStart = $('#searchByBirthDateStart').val();
+                const birthDateEnd = $('#searchByBirthDateEnd').val();
+                const phone = $('#searchByPhone').val().trim();
+                const address = $('#searchByAddress').val().trim();
+
+                // Limpiar resultados previos
+                $('#resultsList').empty();
+
+                // Validar si al menos uno de los campos está lleno
+                if (!name && !doc && !birthDateStart && !birthDateEnd && !phone && !address) {
+                    alert('Por favor ingrese al menos un criterio de búsqueda.');
+                    return;
+                }
+
+                // Construir la URL de búsqueda
+                let url = '/api/clientes/buscar?';
+                if (name) url += 'nombre=' + encodeURIComponent(name) + '&';
+                if (doc) url += 'numeroDocumento=' + encodeURIComponent(doc) + '&';
+                if (birthDateStart && birthDateEnd) url += 'fechaInicio=' + encodeURIComponent(birthDateStart) + '&fechaFin=' + encodeURIComponent(birthDateEnd) + '&';
+                if (phone) url += 'numeroTelefono=' + encodeURIComponent(phone) + '&';
+                if (address) url += 'direccion=' + encodeURIComponent(address) + '&';
+
+                // Realizar la búsqueda
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function (data) {
+                        populateResults(data);
+                    },
+                    error: function (xhr) {
+                        alert('Error al buscar clientes: ' + xhr.responseText);
+                    }
+                });
+            });
+
+            function populateResults(data) {
+                if (data.length === 0) {
+                    $('#resultsList').append('<li class="list-group-item">No se encontraron resultados.</li>');
+                    return;
+                }
+
+                $.each(data, function (index, client) {
+                    $('#resultsList').append(`
+                        <li class='list-group-item'>
+                            <h5>${client.nombreCompleto}</h5>
+                            <p><strong>Número Documento:</strong> ${client.numeroDocumento}</p>
+                            <p><strong>Fecha de Nacimiento:</strong> ${new Date(client.fechaNacimiento).toLocaleDateString()}</p>
+                            <p><strong>Número de Teléfono:</strong> ${client.numeroTelefono || 'No disponible'}</p>
+                            <p><strong>Dirección:</strong> ${client.direccion || 'No disponible'}</p>
+                            <button class='btn btn-warning btn-sm' onclick='updateClient(${client.numeroDocumento})'>Actualizar</button>
+                            <button class='btn btn-danger btn-sm' onclick='deleteClient(${client.numeroDocumento})'>Eliminar</button>
+                        </li>
+                    `);
+                });
+            }
+        });
+
+        function updateClient(numeroDocumento) {
+            window.location.href = `/clientes/actualizar/${numeroDocumento}`;
+        }
+
+        function deleteClient(numeroDocumento) {
+            if (confirm('¿Está seguro de que desea eliminar este cliente?')) {
+                $.ajax({
+                    url: `/api/clientes/${numeroDocumento}`,
+                    type: 'DELETE',
+                    success: function (response) {
+                        alert(response.mensaje);
+                        $('#searchButton').click(); // Refresh results
+                    },
+                    error: function (xhr) {
+                        alert('Error al eliminar el cliente: ' + xhr.responseText);
+                    }
+                });
+            }
+        }
+    </script>
+}

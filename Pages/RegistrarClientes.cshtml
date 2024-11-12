@@ -1,0 +1,174 @@
+﻿@page
+@model RegistrarClientesModel
+@{
+    ViewData["Title"] = "Registrar Cliente";
+}
+
+<h3>Registrar Nuevo Cliente</h3>
+
+<form id="createClientForm" method="post">
+    <div class="form-group">
+        <label for="TipoDocumento">Tipo Documento:</label>
+        <select id="TipoDocumento" name="TipoDocumento" class="form-control">
+            <option value="CC">Cédula de Ciudadanía (CC)</option>
+            <option value="TI">Tarjeta de Identidad (TI)</option>
+            <option value="RC">Registro Civil (RC)</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="NumeroDocumento">Número de Documento:</label>
+        <input type="number" id="NumeroDocumento" name="NumeroDocumento" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Nombres">Nombres:</label>
+        <input type="text" id="Nombres" name="Nombres" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Apellido1">Primer Apellido:</label>
+        <input type="text" id="Apellido1" name="Apellido1" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Apellido2">Segundo Apellido:</label>
+        <input type="text" id="Apellido2" name="Apellido2" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Genero">Género:</label>
+        <select id="Genero" name="Genero" class="form-control">
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="Email">Email:</label>
+        <input type="email" id="Email" name="Email" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="FechaNacimiento">Fecha de Nacimiento:</label>
+        <input type="date" id="FechaNacimiento" name="FechaNacimiento" class="form-control" />
+    </div>
+
+    <div class="form-group row">
+        <div class="col-md-6">
+            <label for="Direcciones">Direcciones:</label>
+            <div id="direccionesContainer">
+                <div class="direccion-group">
+                    <input type="text" class="form-control mb-2" placeholder="Ingrese dirección" />
+                    <button type="button" class="btn btn-danger mb-2" onclick="removeDireccion(this)">Eliminar</button>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary mb-2" onclick="addDireccion()">Agregar Dirección</button>
+        </div>
+        <div class="col-md-6">
+            <label for="Telefonos">Teléfonos:</label>
+            <div id="telefonosContainer">
+                <div class="telefono-group">
+                    <input type="number" class="form-control mb-2" placeholder="Ingrese número de teléfono" />
+                    <button type="button" class="btn btn-danger mb-2" onclick="removeTelefono(this)">Eliminar</button>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary mb-2" onclick="addTelefono()">Agregar Teléfono</button>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button type="button" id="submitClientButton" class="btn btn-success">Registrar</button>
+    </div>
+</form>
+
+<div id="resultMessage" class="alert alert-info mt-3" style="display: none;"></div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function addDireccion() {
+            $('#direccionesContainer').append(`
+                <div class="direccion-group">
+                    <input type="text" class="form-control mb-2" placeholder="Ingrese dirección" />
+                    <button type="button" class="btn btn-danger mb-2" onclick="removeDireccion(this)">Eliminar</button>
+                </div>
+            `);
+        }
+
+        function removeDireccion(button) {
+            $(button).closest('.direccion-group').remove();
+        }
+
+        function addTelefono() {
+            $('#telefonosContainer').append(`
+                <div class="telefono-group">
+                    <input type="number" class="form-control mb-2" placeholder="Ingrese número de teléfono" />
+                    <button type="button" class="btn btn-danger mb-2" onclick="removeTelefono(this)">Eliminar</button>
+                </div>
+            `);
+        }
+
+        function removeTelefono(button) {
+            $(button).closest('.telefono-group').remove();
+        }
+
+        $(document).ready(function () {
+            $('#submitClientButton').click(function () {
+                const direcciones = [];
+                $('#direccionesContainer .direccion-group input').each(function () {
+                    const direccion = $(this).val().trim();
+                    if (direccion) {
+                        direcciones.push({ DireccionCompleta: direccion });
+                    }
+                });
+
+                if (direcciones.length === 0) {
+                    alert('Debe ingresar al menos una dirección.');
+                    return;
+                }
+
+                const telefonos = [];
+                $('#telefonosContainer .telefono-group input').each(function () {
+                    const telefono = $(this).val().trim();
+                    if (telefono) {
+                        telefonos.push({ NumeroTelefono: parseInt(telefono) });
+                    }
+                });
+
+                if (telefonos.length === 0) {
+                    alert('Debe ingresar al menos un teléfono.');
+                    return;
+                }
+
+                const cliente = {
+                    TipoDocumento: $('#TipoDocumento').val(),
+                    NumeroDocumento: parseInt($('#NumeroDocumento').val()),
+                    Nombres: $('#Nombres').val(),
+                    Apellido1: $('#Apellido1').val(),
+                    Apellido2: $('#Apellido2').val(),
+                    Genero: $('#Genero').val(),
+                    Email: $('#Email').val(),
+                    FechaNacimiento: $('#FechaNacimiento').val(),
+                    Direcciones: direcciones,
+                    Telefonos: telefonos
+                };
+
+                $.ajax({
+                    url: '/api/clientes',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(cliente),
+                    success: function (response) {
+                        $('#resultMessage').text('Cliente registrado exitosamente.').removeClass('alert-danger').addClass('alert-success').show();
+                        $('#createClientForm')[0].reset();
+                        $('#direccionesContainer').empty();
+                        $('#telefonosContainer').empty();
+                        addDireccion(); // Agregar una dirección vacía por defecto
+                        addTelefono(); // Agregar un teléfono vacío por defecto
+                    },
+                    error: function (xhr) {
+                        $('#resultMessage').text('Error al registrar cliente: ' + xhr.responseText).removeClass('alert-success').addClass('alert-danger').show();
+                    }
+                });
+            });
+
+            // Agregar inicialmente una dirección y un teléfono vacíos
+            addDireccion();
+            addTelefono();
+        });
+    </script>
+}
