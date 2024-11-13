@@ -49,6 +49,41 @@ Modifica el archivo appsettings.json para agregar tu cadena de conexión a MySQL
   "DefaultConnection": "Server=localhost;Database=CFA_Clientes;User=root;Password=tu_password;"
 }
 
+-- Crear la base de datos y usarla
+CREATE DATABASE CFA_Clientes;
+USE CFA_Clientes;
+
+-- Crear la tabla Clientes
+CREATE TABLE Clientes (
+  Codigo INT AUTO_INCREMENT PRIMARY KEY,
+  TipoDocumento ENUM('CC', 'TI', 'RC') NOT NULL,
+  NumeroDocumento BIGINT NOT NULL UNIQUE,
+  Nombres VARCHAR(30) NOT NULL,
+  Apellido1 VARCHAR(30) NOT NULL,
+  Apellido2 VARCHAR(30),
+  Genero ENUM('F', 'M') NOT NULL,
+  Email VARCHAR(50) UNIQUE,
+  FechaNacimiento DATE NOT NULL,
+  UNIQUE (Codigo)
+);
+
+-- Crear la tabla Direcciones con referencia a Clientes
+CREATE TABLE Direcciones (
+  Id INT AUTO_INCREMENT PRIMARY KEY,
+  CodigoCliente INT,
+  Direccion VARCHAR(100) NOT NULL,
+  FOREIGN KEY (CodigoCliente) REFERENCES Clientes(Codigo)
+);
+
+-- Crear la tabla Telefonos con referencia a Clientes
+CREATE TABLE Telefonos (
+  Id INT AUTO_INCREMENT PRIMARY KEY,
+  CodigoCliente INT,
+  Telefono BIGINT NOT NULL,
+  FOREIGN KEY (CodigoCliente) REFERENCES Clientes(Codigo)
+);
+
+
 Restaura las dependencias:
 
 dotnet restore

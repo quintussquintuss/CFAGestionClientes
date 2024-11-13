@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CFAGestionClientes")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e6741391eb3867122c942e8dec788aa998f98acd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+62b6ef10e9f12a1461736b3563fe71ec36235e6d")]
 [assembly: System.Reflection.AssemblyProductAttribute("CFAGestionClientes")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CFAGestionClientes")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
