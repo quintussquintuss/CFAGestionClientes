@@ -183,6 +183,7 @@ namespace CFAGestionClientes.Controllers
 
         // GET: api/clientes/buscarPorNumeroDocumento
         [HttpGet("buscarPorNumeroDocumento")]
+        [Authorize] // Este método requiere autenticación
         public IActionResult BuscarPorNumeroDocumento(long numeroDocumento)
         {
             var resultado = _context.Clientes

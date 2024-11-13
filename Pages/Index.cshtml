@@ -97,32 +97,37 @@
 
                 $.each(data, function (index, client) {
                     $('#resultsList').append(`
-                        <li class='list-group-item'>
-                            <h5>${client.nombreCompleto}</h5>
-                            <p><strong>Número Documento:</strong> ${client.numeroDocumento}</p>
-                            <p><strong>Fecha de Nacimiento:</strong> ${new Date(client.fechaNacimiento).toLocaleDateString()}</p>
-                            <p><strong>Número de Teléfono:</strong> ${client.numeroTelefono || 'No disponible'}</p>
-                            <p><strong>Dirección:</strong> ${client.direccion || 'No disponible'}</p>
-                            <button class='btn btn-warning btn-sm' onclick='updateClient(${client.numeroDocumento})'>Actualizar</button>
-                            <button class='btn btn-danger btn-sm' onclick='deleteClient(${client.numeroDocumento})'>Eliminar</button>
-                        </li>
-                    `);
+                            <li class='list-group-item'>
+                                <h5>${client.nombreCompleto}</h5>
+                                <p><strong>Número Documento:</strong> ${client.numeroDocumento}</p>
+                                <p><strong>Fecha de Nacimiento:</strong> ${new Date(client.fechaNacimiento).toLocaleDateString()}</p>
+                                <p><strong>Número de Teléfono:</strong> ${client.numeroTelefono || 'No disponible'}</p>
+                                <p><strong>Dirección:</strong> ${client.direccion || 'No disponible'}</p>
+                                <button class='btn btn-warning btn-sm' onclick='updateClient(${client.numeroDocumento})'>Actualizar</button>
+                                <button class='btn btn-danger btn-sm' onclick='deleteClient(${client.numeroDocumento})'>Eliminar</button>
+                            </li>
+                        `);
                 });
             }
+
         });
 
-        function updateClient(numeroDocumento) {
-            window.location.href = `/clientes/actualizar/${numeroDocumento}`;
-        }
-
         function deleteClient(numeroDocumento) {
+            // Asegúrate de que numeroDocumento sea un número entero
+            numeroDocumento = parseInt(numeroDocumento, 10);
+
+            if (isNaN(numeroDocumento)) {
+                alert('Error: El número de documento del cliente no es válido.');
+                return;
+            }
+
             if (confirm('¿Está seguro de que desea eliminar este cliente?')) {
                 $.ajax({
                     url: `/api/clientes/${numeroDocumento}`,
                     type: 'DELETE',
                     success: function (response) {
                         alert(response.mensaje);
-                        $('#searchButton').click(); // Refresh results
+                        $('#searchButton').click(); // Refrescar resultados
                     },
                     error: function (xhr) {
                         alert('Error al eliminar el cliente: ' + xhr.responseText);
@@ -130,5 +135,8 @@
                 });
             }
         }
+
+
+
     </script>
 }

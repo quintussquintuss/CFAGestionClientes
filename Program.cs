@@ -36,10 +36,11 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
         ValidateIssuer = true,
         ValidateAudience = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new ArgumentNullException("Issuer no puede ser nulo."),
-        ValidAudience = builder.Configuration["Jwt:Audience"] ?? throw new ArgumentNullException("Audience no puede ser nulo."),
-        ClockSkew = TimeSpan.Zero // Reduce el tiempo de tolerancia para la expiración del token
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ClockSkew = TimeSpan.Zero
     };
+
 });
 
 var app = builder.Build();
